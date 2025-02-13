@@ -1,1 +1,18 @@
-# webhook → https://hooks.slack.com/services/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
+name: Slack Notification via Webhook
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  send-message:
+    runs-on: ubuntu-latest
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    steps:
+      - name: Send Slack message via Webhook
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+          --data '{"text": "GitHub Actions からの通知です！"}' \
+          "$SLACK_WEBHOOK_URL"
