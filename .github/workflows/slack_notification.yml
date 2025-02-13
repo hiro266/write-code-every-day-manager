@@ -1,17 +1,17 @@
-name: Slack通知
+name: Slack Notification
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
-  send-message:
+  notify:
+    name: Slackへ通知を送信
     runs-on: ubuntu-latest
-    environment: slack # GitHub > Settings > Environments で設定した環境
+    environment: slack
     steps:
-      - name: Send Slack通知
-        run: >
-          curl -X POST -H 'Content-type: application/json'
-          --data '{"text": "GitHub Actions からの通知です！"}'
-          "$SLACK_WEBHOOK_URL"
+      - name: Slackにメッセージ送信
+        run: |
+          curl -X POST \
+            -H 'Content-type: application/json' \
+            --data '{"text": "GitHub Actionsからの通知です！"}' \
+            "${{ secrets.SLACK_WEBHOOK_URL }}"
