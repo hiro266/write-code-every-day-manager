@@ -12,6 +12,6 @@ jobs:
       - name: Slackにメッセージ送信
         run: |
           curl -X POST \
-          -F channel=${{ secrets.SLACK_CHANNEL_ID }}
-          -F text="テストだよ" https://slack.com/api/chat.postMessage
+          -F channel=${{ secrets.SLACK_CHANNEL_ID }} \
+          -F text="テストだよ" https://slack.com/api/chat.postMessage \
           -H "Authorization: Bearer ${{ secrets.BOT_USER_OAUTH_TOKEN }}"
