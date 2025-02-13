@@ -15,5 +15,5 @@ jobs:
         run: |
           curl -X POST \
             -H 'Content-type: application/json' \
-            --payload '{"text": "GitHub Actionsからの通知です！"}' \
+            --data '{"text": "GitHub Actionsからの通知です！"}' \
             "${{ secrets.SLACK_WEBHOOK_URL }}"
