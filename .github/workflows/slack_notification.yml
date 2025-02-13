@@ -8,10 +8,10 @@ on:
 jobs:
   send-message:
     runs-on: ubuntu-latest
-    environment: slack # GitHub > Settings > Environments を指定
+    environment: slack # GitHub > Settings > Environments で設定した環境
     steps:
       - name: Send Slack通知
-        run: |
-          curl -X POST -H 'Content-type: application/json' \
-          --data '{"text": "GitHub Actions からの通知です！"}' \
+        run: >
+          curl -X POST -H 'Content-type: application/json'
+          --data '{"text": "GitHub Actions からの通知です！"}'
           "$SLACK_WEBHOOK_URL"
