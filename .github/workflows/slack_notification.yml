@@ -8,8 +8,7 @@ on:
 jobs:
   send-message:
     runs-on: ubuntu-latest
-    env:
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    environment: slack # GitHub > Settings > Environments を指定
     steps:
       - name: Send Slack message via Webhook
         run: |
