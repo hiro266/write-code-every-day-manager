@@ -1,11 +1,11 @@
-name: Slack Notification
+name: Slack Notification Dispatch Test
 
 on:
   workflow_dispatch: # GitHubの「Run workflow」ボタンから実行可能
 
 jobs:
   notify:
-    name: Slackへ通知を送信
+    name: Slackへメッセージを送信
     runs-on: ubuntu-latest
     environment: slack # GitHub > Settings > Environments を指定
     steps:
