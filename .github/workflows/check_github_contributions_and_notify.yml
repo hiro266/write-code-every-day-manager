@@ -17,7 +17,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         # GitHub CLI の gh コマンドを使い、GraphQL API にリクエスト
         # -F で変数を指定, -f query で実行したいGraphQLクエリを指定
-        # jq でJSONから必要な情報を取得
+        # jq でJSONから必要な情報を取得(標準出力の中から読み込むため事前に echo しておく)
         # TOTAL_CONTRIBUTIONS を $GITHUB_ENV にエクスポートして、後続のステップで利用
         run: |
           DATE=$(date -u +"%Y-%m-%dT00:00:00Z")
