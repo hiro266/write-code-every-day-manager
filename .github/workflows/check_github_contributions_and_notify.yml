@@ -12,11 +12,18 @@ jobs:
     environment: slack # GitHub > Settings > Environments を指定
     steps:
       - name: Check for Contributions
+        # GitHub CLI が GitHub API にリクエストを送信するための認証トークンを指定
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # GitHub CLI の gh コマンドを使い、GraphQL API にリクエスト
+        # -F で変数を指定, -f query で実行したいGraphQLクエリを指定
+        # jq でJSONから必要な情報を取得
+        # TOTAL_CONTRIBUTIONS を $GITHUB_ENV にエクスポートして、後続のステップで利用
         run: |
           DATE=$(date -u +"%Y-%m-%dT00:00:00Z")
-          RESPONSE=$(gh api graphql -F DATE=$DATE -F USER=$GITHUB_REPOSITORY_OWNER -f query='
+          USER=$GITHUB_REPOSITORY_OWNER
+
+          RESPONSE=$(gh api graphql -F DATE=$DATE -F USER=$USER -f query='
             query ($DATE: DateTime, $USER: String!){
               user(login: $USER) {
                 contributionsCollection(from: $DATE, to: $DATE) {
@@ -31,12 +38,20 @@ jobs:
           echo "Response: $RESPONSE"
           TOTAL_CONTRIBUTIONS=$(echo $RESPONSE | jq '.data.user.contributionsCollection.contributionCalendar.totalContributions')
           echo "Total contributions: $TOTAL_CONTRIBUTIONS"
+
           echo "TOTAL_CONTRIBUTIONS=$TOTAL_CONTRIBUTIONS" >> $GITHUB_ENV
 
       # Slackに通知
       - name: Send Slack if No Contributions
         run: |
+          echo "TOTAL_CONTRIBUTIONS: $TOTAL_CONTRIBUTIONS"
+          if [ "$TOTAL_CONTRIBUTIONS" -gt 0 ]; then
+            MESSAGE="本日のコントリビューション: $TOTAL_CONTRIBUTIONS 件"
+          else
+            MESSAGE="本日のコントリビューションがありません。"
+          fi
           curl -X POST \
-          -F channel=${{ secrets.SLACK_CHANNEL_ID }} \
-          -F text="本日のコントリビューションはありませんでした。" https://slack.com/api/chat.postMessage \
-          -H "Authorization: Bearer ${{ secrets.BOT_USER_OAUTH_TOKEN }}"
+            -F channel=${{ secrets.SLACK_CHANNEL_ID }} \
+            -F text="$MESSAGE" \
+            https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer ${{ secrets.BOT_USER_OAUTH_TOKEN }}"
