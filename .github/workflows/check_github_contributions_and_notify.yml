@@ -1,0 +1,42 @@
+name: Check GitHub Contributions And Notify
+
+on:
+  schedule:
+    - cron: "0 13 * * *" # 毎日22時に実行
+  workflow_dispatch: # GitHubの「Run workflow」ボタンから実行可能
+
+jobs:
+  check-and-notify:
+    name: 本日のGitHubコントリビューションを確認してSlackに通知
+    runs-on: ubuntu-latest
+    environment: slack # GitHub > Settings > Environments を指定
+    steps:
+      - name: Check for Contributions
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          DATE=$(date -u +"%Y-%m-%dT00:00:00Z")
+          RESPONSE=$(gh api graphql -F DATE=$DATE -F USER=$GITHUB_REPOSITORY_OWNER -f query='
+            query ($DATE: DateTime, $USER: String!){
+              user(login: $USER) {
+                contributionsCollection(from: $DATE, to: $DATE) {
+                  contributionCalendar{
+                    totalContributions
+                  }
+                }
+              }
+            }
+            '
+          )
+          echo "Response: $RESPONSE"
+          TOTAL_CONTRIBUTIONS=$(echo $RESPONSE | jq '.data.user.contributionsCollection.contributionCalendar.totalContributions')
+          echo "Total contributions: $TOTAL_CONTRIBUTIONS"
+          echo "TOTAL_CONTRIBUTIONS=$TOTAL_CONTRIBUTIONS" >> $GITHUB_ENV
+
+      # Slackに通知
+      - name: Send Slack if No Contributions
+        run: |
+          curl -X POST \
+          -F channel=${{ secrets.SLACK_CHANNEL_ID }} \
+          -F text="本日のコントリビューションはありませんでした。" https://slack.com/api/chat.postMessage \
+          -H "Authorization: Bearer ${{ secrets.BOT_USER_OAUTH_TOKEN }}"
