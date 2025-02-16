@@ -2,7 +2,7 @@ name: Check GitHub Contributions And Notify
 
 on:
   schedule:
-    - cron: "0 13 * * *" # 毎日22時に実行
+    - cron: "15 13 * * *" # 毎日22時に実行
   workflow_dispatch: # GitHubの「Run workflow」ボタンから実行可能
 
 jobs:
