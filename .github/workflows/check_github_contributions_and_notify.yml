@@ -23,6 +23,7 @@ jobs:
           DATE=$(date -u +"%Y-%m-%dT00:00:00Z")
           USER=$GITHUB_REPOSITORY_OWNER
 
+          ## --- GraphQL API を用いて contributions を取得 ---
           RESPONSE=$(gh api graphql -F DATE=$DATE -F USER=$USER -f query='
             query ($DATE: DateTime, $USER: String!){
               user(login: $USER) {
@@ -39,8 +40,10 @@ jobs:
           TOTAL_CONTRIBUTIONS=$(echo $RESPONSE | jq '.data.user.contributionsCollection.contributionCalendar.totalContributions')
           echo "Total contributions: $TOTAL_CONTRIBUTIONS"
 
+          ## --- 後続の処理で利用するために環境変数にエクスポート ---
           echo "TOTAL_CONTRIBUTIONS=$TOTAL_CONTRIBUTIONS" >> $GITHUB_ENV
 
+          ## --- contributions 件数に応じたメッセージを生成 ---
           if [ "$TOTAL_CONTRIBUTIONS" -gt 0 ]; then
             MESSAGE="本日のコントリビューション: $TOTAL_CONTRIBUTIONS 件"
           else
