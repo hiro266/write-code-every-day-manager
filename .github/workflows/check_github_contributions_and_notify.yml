@@ -41,6 +41,28 @@ jobs:
 
           echo "TOTAL_CONTRIBUTIONS=$TOTAL_CONTRIBUTIONS" >> $GITHUB_ENV
 
+      # LINEに通知
+      - name: Send Slack if No Contributions
+        run: |
+          echo "TOTAL_CONTRIBUTIONS: $TOTAL_CONTRIBUTIONS"
+          if [ "$TOTAL_CONTRIBUTIONS" -gt 0 ]; then
+            MESSAGE="本日のコントリビューション: $TOTAL_CONTRIBUTIONS 件"
+          else
+            MESSAGE="本日のコントリビューションがありません。"
+          fi
+          curl -X POST https://api.line.me/v2/bot/message/push \
+          -H 'Content-Type: application/json' \
+          -H 'Authorization: Bearer ${{ secrets.NOTIFICATION_BOT_MESSAGING_API_CHANNEL_ACCESS_TOKEN }}' \
+          -d '{
+            "to": ${{ secrets.NOTIFICATION_BOT_USER_ID }},
+            "messages": [
+              {
+                "type": "text",
+                "text": "$MESSAGE"
+              }
+            ]
+          }'
+
       # Slackに通知
       - name: Send Slack if No Contributions
         run: |
